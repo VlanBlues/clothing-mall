@@ -25,7 +25,7 @@ export default {
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        totalNum += temp.num;
+        totalNum += temp.goodsNum;
       }
       return totalNum;
     },

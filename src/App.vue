@@ -18,7 +18,7 @@
                   <el-button size="mini" type="text" @click="visible = false">取消</el-button>
                   <el-button type="primary" size="mini" @click="logout">确定</el-button>
                 </div>
-                <el-button type="text" slot="reference">{{this.$store.getters.getUser.userName}}</el-button>
+                <el-button type="text" slot="reference">{{this.$store.getters.getUser.username}}</el-button>
               </el-popover>
             </li>
             <li>
@@ -107,7 +107,7 @@
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
-
+import { listByUserId } from '@/api/cart'
 export default {
   beforeUpdate() {
     this.activeIndex = this.$route.path;
@@ -145,15 +145,16 @@ export default {
         // 用户没有登录
         this.setShoppingCart([]);
       } else {
+        console.log('*******0',val)
         // 用户已经登录,获取该用户的购物车信息
-        this.$axios
-          .post("/api/user/shoppingCart/getShoppingCart", {
-            user_id: val.user_id
+        listByUserId({
+            userId: val.userId
           })
           .then(res => {
-            if (res.data.code === "001") {
+            if (res.data.code === 200) {
               // 001 为成功, 更新vuex购物车状态
-              this.setShoppingCart(res.data.shoppingCartData);
+              this.setShoppingCart(res.data.data);
+              console.log('cart',res.data.data)
             } else {
               // 提示失败信息
               this.notifyError(res.data.msg);

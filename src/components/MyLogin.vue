@@ -23,7 +23,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
-
+import { login } from '@/api/user'
 export default {
   name: "MyLogin",
   data() {
@@ -88,21 +88,20 @@ export default {
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始登录
         if (valid) {
-          this.$axios
-            .post("/api/users/login", {
-              userName: this.LoginUser.name,
+          login({
+              username: this.LoginUser.name,
               password: this.LoginUser.pass
             })
             .then(res => {
               // “001”代表登录成功，其他的均为失败
-              if (res.data.code === "001") {
+              if (res.data.code === 200) {
                 // 隐藏登录组件
                 this.isLogin = false;
                 // 登录信息存到本地
-                let user = JSON.stringify(res.data.user);
+                let user = JSON.stringify(res.data.data);
                 localStorage.setItem("user", user);
                 // 登录信息存到vuex
-                this.setUser(res.data.user);
+                this.setUser(res.data.data);
                 // 弹出通知框提示登录成功信息
                 this.notifySucceed(res.data.msg);
               } else {

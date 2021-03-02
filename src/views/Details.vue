@@ -1,32 +1,12 @@
 <template>
   <div id="details">
-    <!-- 头部 -->
-    <div class="page-header">
-      <div class="title">
-        <div class="list">
-          <ul>
-            <li>
-              <router-link to>概述</router-link>
-            </li>
-            <li>
-              <router-link to>参数</router-link>
-            </li>
-            <li>
-              <router-link to>用户评价</router-link>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <!-- 头部END -->
-
     <!-- 主要内容 -->
     <div class="main">
       <!-- 左侧商品轮播图 -->
       <div class="block">
-        <el-carousel height="560px" v-if="productPicture.length>1">
+        <el-carousel height="500px" v-if="productPicture.length>1">
           <el-carousel-item v-for="item in productPicture" :key="item">
-            <img style="width:560px;" :src="item" :alt="item" />
+            <img style="width:500px;" :src="item" :alt="item" />
           </el-carousel-item>
         </el-carousel>
       </div>
@@ -39,7 +19,8 @@
         <p class="store">商城自营</p>
         <div class="pro-list">
           <span class="pro-name">{{productDetails.name}}</span>
-          <p class="price-sum">总计 : 100元</p>
+          <el-input-number size="small" v-model="goodsNum"></el-input-number>
+          <p class="price-sum">总计 : {{productDetails.retailPrice * goodsNum}}元</p>
         </div>
         <!-- 内容区底部按钮 -->
         <div class="button">
@@ -78,11 +59,13 @@ export default {
       dis: false, // 控制“加入购物车按钮是否可用”
       goodsId: "", // 商品id
       productDetails: "", // 商品详细信息
-      productPicture: "" // 商品图片
+      productPicture: "",// 商品图片
+      goodsNum:1 //商品数量
     };
   },
   // 通过路由获取商品id
   activated() {
+    window.scrollTo(0,0)
     if (this.$route.query.goodsId !== undefined) {
       this.goodsId = this.$route.query.goodsId;
     }
@@ -169,46 +152,7 @@ export default {
   }
 };
 </script>
-<style>
-/* 头部CSS */
-#details .page-header {
-  height: 64px;
-  margin-top: -20px;
-  z-index: 4;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  -webkit-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.07);
-  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.07);
-}
-#details .page-header .title {
-  width: 1225px;
-  height: 64px;
-  line-height: 64px;
-  font-size: 18px;
-  font-weight: 400;
-  color: #212121;
-  margin: 0 auto;
-}
-#details .page-header .title p {
-  float: left;
-}
-#details .page-header .title .list {
-  height: 64px;
-  float: right;
-}
-#details .page-header .title .list li {
-  float: left;
-  margin-left: 20px;
-}
-#details .page-header .title .list li a {
-  font-size: 14px;
-  color: #616161;
-}
-#details .page-header .title .list li a:hover {
-  font-size: 14px;
-  color: #ff6700;
-}
-/* 头部CSS END */
+<style type="scss">
 
 /* 主要内容CSS */
 #details .main {
@@ -263,7 +207,10 @@ export default {
   padding: 30px 60px;
   margin: 50px 0 50px;
 }
-#details .main .content .pro-list span {
+.pro-list .el-input-number{
+  margin-top: 20px;
+}
+#details .main .content .pro-list>span {
   line-height: 30px;
   color: #616161;
 }

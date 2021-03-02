@@ -40,6 +40,7 @@
   </div>
 </template>
 <script>
+  import {register} from "@/api/user"
 export default {
   name: "MyRegister",
   props: ["register"],
@@ -138,14 +139,13 @@ export default {
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始注册
         if (valid) {
-          this.$axios
-            .post("/api/users/register", {
-              userName: this.RegisterUser.name,
+          register({
+              username: this.RegisterUser.name,
               password: this.RegisterUser.pass
             })
             .then(res => {
               // “001”代表注册成功，其他的均为失败
-              if (res.data.code === "001") {
+              if (res.data.code === 200) {
                 // 隐藏注册组件
                 this.isRegister = false;
                 // 弹出通知框提示注册成功信息
