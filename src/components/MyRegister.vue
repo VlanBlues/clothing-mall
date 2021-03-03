@@ -53,23 +53,8 @@ export default {
       // 用户名以字母开头,长度在5-16之间,允许字母数字下划线
       const userNameRule = /^[a-zA-Z][a-zA-Z0-9_]{4,15}$/;
       if (userNameRule.test(value)) {
-        //判断数据库中是否已经存在该用户名
-        this.$axios
-          .post("/api/users/findUserName", {
-            userName: this.RegisterUser.name
-          })
-          .then(res => {
-            // “001”代表用户名不存在，可以注册
-            if (res.data.code == "001") {
-              this.$refs.ruleForm.validateField("checkPass");
-              return callback();
-            } else {
-              return callback(new Error(res.data.msg));
-            }
-          })
-          .catch(err => {
-            return Promise.reject(err);
-          });
+        this.$refs.ruleForm.validateField("checkPass");
+        return callback();
       } else {
         return callback(new Error("字母开头,长度5-16之间,允许字母数字下划线"));
       }
@@ -112,7 +97,7 @@ export default {
       },
       // 用户信息校验规则,validator(校验方法),trigger(触发方式),blur为在组件 Input 失去焦点时触发
       rules: {
-        name: [{ validator: validateName, trigger: "blur" }],
+        // name: [{ validator: validateName, trigger: "blur" }],
         pass: [{ validator: validatePass, trigger: "blur" }],
         confirmPass: [{ validator: validateConfirmPass, trigger: "blur" }]
       }
@@ -135,6 +120,7 @@ export default {
   },
   methods: {
     Register() {
+      console.log(999)
       // 通过element自定义表单校验规则，校验用户输入的用户信息
       this.$refs["ruleForm"].validate(valid => {
         //如果通过校验开始注册

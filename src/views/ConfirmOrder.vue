@@ -1,9 +1,5 @@
 <!--
  * @Description: 确认订单页面组件
- * @Author: hai-27
- * @Date: 2020-02-23 23:46:39
- * @LastEditors: hai-27
- * @LastEditTime: 2020-03-29 13:10:21
  -->
 <template>
   <div class="confirmOrder">
@@ -52,12 +48,12 @@
         <p class="title">商品及优惠券</p>
         <div class="goods-list">
           <ul>
-            <li v-for="item in getCheckGoods" :key="item.id">
-              <img :src="$target + item.productImg"/>
-              <span class="pro-name">{{item.productName}}</span>
-              <span class="pro-price">{{item.price}}元 x {{item.num}}</span>
+            <li v-for="item in getCheckGoods" :key="item.cartId">
+              <img :src="item.goods.picUrl"/>
+              <span class="pro-name">{{item.goods.name}}</span>
+              <span class="pro-price">{{item.goods.retailPrice}}元 x {{item.goodsNum}}</span>
               <span class="pro-status"></span>
-              <span class="pro-total">{{item.price * item.num}}元</span>
+              <span class="pro-total">{{item.goods.retailPrice * item.goodsNum}}元</span>
             </li>
           </ul>
         </div>
@@ -181,7 +177,7 @@
         this.$router.push({path: "/shoppingCart"});
       }
       console.log('get----------')
-      this.getAddrByUser()
+      // this.getAddrByUser()
     },
     computed: {
       // 结算的商品数量; 结算商品总计; 结算商品信息

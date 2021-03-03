@@ -7,3 +7,18 @@ export function listByUserId(data) {
     params:data
   })
 }
+
+export function addCart(data) {
+  return request({
+    url: '/mall/cart/add',
+    method: 'post',
+    data
+  })
+}
+export function updateCart(data) {
+  return request({
+    url: '/mall/cart/update',
+    method: 'post',
+    data
+  })
+}

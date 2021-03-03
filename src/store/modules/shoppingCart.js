@@ -52,6 +52,7 @@ export default {
           checkGoods.push(temp);
         }
       }
+      console.log('checkGoods',checkGoods)
       return checkGoods;
     },
     getCheckNum (state) {
@@ -60,7 +61,7 @@ export default {
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
         if (temp.check) {
-          totalNum += temp.num;
+          totalNum += temp.goodsNum;
         }
       }
       return totalNum;
@@ -71,7 +72,7 @@ export default {
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
         if (temp.check) {
-          totalPrice += temp.price * temp.num;
+          totalPrice += temp.goods.retailPrice * temp.goodsNum;
         }
       }
       return totalPrice;
@@ -91,11 +92,8 @@ export default {
       // 更新购物车
       // 可更新商品数量和是否勾选
       // 用于购物车点击勾选及加减商品数量
-      if (payload.prop == "num") {
-        // 判断效果的商品数量是否大于限购数量或小于1
-        if (state.shoppingCart[payload.key].maxNum < payload.val) {
-          return;
-        }
+      if (payload.prop == "goodsNum") {
+        // 判断效果的商品数量是否小于1
         if (payload.val < 1) {
           return;
         }

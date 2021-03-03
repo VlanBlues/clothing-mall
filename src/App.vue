@@ -152,7 +152,7 @@ export default {
           })
           .then(res => {
             if (res.data.code === 200) {
-              // 001 为成功, 更新vuex购物车状态
+              //更新vuex购物车状态
               this.setShoppingCart(res.data.data);
               console.log('cart',res.data.data)
             } else {

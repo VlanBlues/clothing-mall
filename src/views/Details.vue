@@ -53,6 +53,7 @@
 <script>
 import { mapActions } from "vuex";
 import { getByGoodsId } from '@/api/goods'
+import { addCart } from '@/api/cart'
 export default {
   data() {
     return {
@@ -77,7 +78,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["unshiftShoppingCart", "addShoppingCartNum"]),
+    ...mapActions(["unshiftShoppingCart", "addShoppingCartNum","setShoppingCart"]),
     // 获取商品详细信息
     getDetails(val) {
       getByGoodsId({goodsId:val}).then(res =>{
@@ -95,31 +96,14 @@ export default {
         this.$store.dispatch("setShowLogin", true);
         return;
       }
-      this.$axios
-        .post("/api/user/shoppingCart/addShoppingCart", {
-          user_id: this.$store.getters.getUser.user_id,
-          product_id: this.productID
+      addCart({
+          userId: this.$store.getters.getUser.userId,
+          goodsSn: this.productDetails.goodsSn,
+          goodsNum: this.goodsNum
         })
         .then(res => {
-          switch (res.data.code) {
-            case "001":
-              // 新加入购物车成功
-              this.unshiftShoppingCart(res.data.shoppingCartData[0]);
-              this.notifySucceed(res.data.msg);
-              break;
-            case "002":
-              // 该商品已经在购物车，数量+1
-              this.addShoppingCartNum(this.productID);
-              this.notifySucceed(res.data.msg);
-              break;
-            case "003":
-              // 商品数量达到限购数量
-              this.dis = true;
-              this.notifyError(res.data.msg);
-              break;
-            default:
-              this.notifyError(res.data.msg);
-          }
+          this.notifySucceed(res.data.msg);
+          this.setShoppingCart(res.data.data);
         })
         .catch(err => {
           return Promise.reject(err);

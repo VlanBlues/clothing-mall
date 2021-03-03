@@ -31,31 +31,30 @@
         <!-- 购物车表头END -->
 
         <!-- 购物车列表 -->
-        <li class="product-list" v-for="(item,index) in getShoppingCart" :key="item.id">
+        <li class="product-list" v-for="(item,index) in getShoppingCart" :key="item.cartId">
           <div class="pro-check">
             <el-checkbox :value="item.check" @change="checkChange($event,index)"></el-checkbox>
           </div>
           <div class="pro-img">
-            <router-link :to="{ path: '/goods/details', query: {productID:item.productID} }">
-              <img :src="$target + item.productImg" />
+            <router-link :to="{ path: '/goods/details', query: {goodsId:item.goods.goodsId} }">
+              <img :src="item.goods.picUrl" />
             </router-link>
           </div>
-          <div class="pro-name">
+          <div class="pro-name" style="line-height: 20px;margin-top: 20px;">
             <router-link
-              :to="{ path: '/goods/details', query: {productID:item.productID} }"
-            >{{item.productName}}</router-link>
+              :to="{ path: '/goods/details', query: {goodsId:item.goods.goodsId} }"
+            >{{item.goods.name}}</router-link>
           </div>
-          <div class="pro-price">{{item.price}}元</div>
+          <div class="pro-price">{{item.goods.retailPrice}}元</div>
           <div class="pro-num">
             <el-input-number
               size="small"
-              :value="item.num"
-              @change="handleChange($event,index,item.productID)"
+              :value="item.goodsNum"
+              @change="handleChange($event,index,item.cartId)"
               :min="1"
-              :max="item.maxNum"
             ></el-input-number>
           </div>
-          <div class="pro-total pro-total-in">{{item.price*item.num}}元</div>
+          <div class="pro-total pro-total-in">{{item.goods.retailPrice*item.goodsNum}}元</div>
           <div class="pro-action">
             <el-popover placement="right">
               <p>确定删除吗？</p>
@@ -113,7 +112,7 @@
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
-
+import {updateCart} from "@/api/cart"
 export default {
   data() {
     return {};
@@ -121,41 +120,36 @@ export default {
   methods: {
     ...mapActions(["updateShoppingCart", "deleteShoppingCart", "checkAll"]),
     // 修改商品数量的时候调用该函数
-    handleChange(currentValue, key, productID) {
+    handleChange(currentValue, key, cartId) {
       // 当修改数量时，默认勾选
       this.updateShoppingCart({ key: key, prop: "check", val: true });
       // 向后端发起更新购物车的数据库信息请求
-      this.$axios
-        .post("/api/user/shoppingCart/updateShoppingCart", {
-          user_id: this.$store.getters.getUser.user_id,
-          product_id: productID,
-          num: currentValue
+      updateCart({
+          cartId: cartId,
+          goodsNum: currentValue
         })
         .then(res => {
-          switch (res.data.code) {
-            case "001":
-              // “001”代表更新成功
-              // 更新vuex状态
-              this.updateShoppingCart({
-                key: key,
-                prop: "num",
-                val: currentValue
-              });
-              // 提示更新成功信息
-              this.notifySucceed(res.data.msg);
-              break;
-            default:
-              // 提示更新失败信息
-              this.notifyError(res.data.msg);
+          if(res.data.code === 200){
+            this.updateShoppingCart({
+              key: key,
+              prop: "goodsNum",
+              val: currentValue
+            });
+            // 提示更新成功信息
+            this.notifySucceed(res.data.msg);
+          }else {
+            this.notifyError(res.data.msg);
           }
-        })
-        .catch(err => {
-          return Promise.reject(err);
-        });
+        }).catch(err => {
+        return Promise.reject(err);
+      });
+        
     },
     checkChange(val, key) {
       // 更新vuex中购物车商品是否勾选的状态
       this.updateShoppingCart({ key: key, prop: "check", val: val });
+      console.log(val,key)
+      console.log(this.getShoppingCart)
     },
     // 向后端发起删除购物车的数据库信息请求
     deleteItem(e, id, productID) {
