@@ -117,7 +117,7 @@ export default {
       // 根据购物车id删除购物车商品
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.id == id) {
+        if (temp.cartId === id) {
           state.shoppingCart.splice(i, 1);
         }
       }

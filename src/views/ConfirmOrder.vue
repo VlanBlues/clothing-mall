@@ -29,9 +29,10 @@
                     :class="index === confirmAddress ? 'in-section' : ''"
             >
               <h2>{{item.name}}</h2>
-              <p class="phone">{{item.phone}}</p>
+              <p class="phone">{{item.mobile}}</p>
+              <p class="address">{{item.province}}/{{item.city}}/{{item.area}}</p>
               <p class="address">{{item.address}}</p>
-              <span class="el-icon-circle-close" @click="delAddr(item.addr_id)"></span>
+              <span class="el-icon-circle-close" @click="delAddr(item.addressId)"></span>
             </li>
             <li class="add-address" @click="dialogFormVisible = true">
               <i class="el-icon-circle-plus-outline"></i>
@@ -115,22 +116,25 @@
       <div class="section-bar">
         <div class="btn">
           <router-link to="/shoppingCart" class="btn-base btn-return">返回购物车</router-link>
-          <a href="javascript:void(0);" @click="addOrder" class="btn-base btn-primary">结算</a>
+          <a @click="addOrder" class="btn-base btn-primary">结算</a>
         </div>
       </div>
       <!-- 结算导航END -->
     </div>
     <!-- 主要内容容器END -->
     <!--添加地址-->
-    <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+    <el-dialog title="收货地址" :visible.sync="dialogFormVisible" width="40%">
       <el-form :model="addr" label-position="left">
         <el-form-item label="昵称" :label-width="formLabelWidth">
           <el-input v-model="addr.name" autocomplete="off" clearable></el-input>
         </el-form-item>
         <el-form-item label="电话" :label-width="formLabelWidth">
-          <el-input v-model="addr.phone" autocomplete="off" clearable></el-input>
+          <el-input v-model="addr.mobile" autocomplete="off" clearable></el-input>
         </el-form-item>
         <el-form-item label="地址" :label-width="formLabelWidth">
+          <el-cascader style="width: 100%" ref="myCascader" :options="options" v-model="selectedOptions" @change="handleChange"></el-cascader>
+        </el-form-item>
+        <el-form-item label="详细地址" :label-width="formLabelWidth">
           <el-input type="textarea" :role="1" v-model="addr.address" autocomplete="off" clearable></el-input>
         </el-form-item>
       </el-form>
@@ -144,19 +148,26 @@
 <script>
   import {mapGetters} from "vuex";
   import {mapActions} from "vuex";
-
+  import {addGoods} from "@/api/goods"
+  import {addAddress , getAddressByUserId} from "@/api/address"
+  let pca = require("@/assets/pca-code.json")
   export default {
     name: "",
     data() {
       return {
+        options: pca,
+        selectedOptions:[],
         dialogFormVisible: false,
         addr: {
-          addr_id: '',
+          userId:this.$store.getters.getUser.userId,
           name: '',
-          phone: '',
-          address: ''
+          mobile: '',
+          province: '',
+          city:'',
+          area:'',
+          address:''
         },
-        formLabelWidth: '60px',
+        formLabelWidth: '70px',
         // 虚拟数据
         confirmAddress: 0, // 选择的地址id
         // 地址列表
@@ -164,8 +175,11 @@
           {
             addr_id: 2,
             name: "蓝同学",
-            phone: "13580018623",
-            address: "浙江省 宁波市 海曙区"
+            mobile: "13580018623",
+            address: "浙江省 宁波市 海曙区",
+            province: '',
+            city:'',
+            area:''
           }
         ]
       };
@@ -177,7 +191,7 @@
         this.$router.push({path: "/shoppingCart"});
       }
       console.log('get----------')
-      // this.getAddrByUser()
+      this.getAddrByUser()
     },
     computed: {
       // 结算的商品数量; 结算商品总计; 结算商品信息
@@ -185,14 +199,18 @@
     },
     methods: {
       ...mapActions(["deleteShoppingCart"]),
+      handleChange(value){
+        console.log('selectedOptions',this.selectedOptions)
+        console.log(value)
+      },
       getAddrByUser(){
-        this.$axios
-          .post("/api/addr/get_by_user", {
-            user_id: this.$store.getters.getUser.user_id
+        getAddressByUserId({
+            userId: this.$store.getters.getUser.userId
           })
           .then(res => {
-            if (res.data.code === "001") {
-              this.address = res.data.result
+            if (res.data.code === 200) {
+              this.address = res.data.data
+              console.log('get address',res.data.data)
             }
           })
           .catch(err => {
@@ -231,32 +249,48 @@
       },
       addAddr() {
         // this.address.push(this.form)
-        this.dialogFormVisible = false
-        this.$axios
-          .post("/api/addr/add", {
-            name:this.addr.name,
-            phone:this.addr.phone,
-            address:this.addr.address,
-            user_id:this.$store.getters.getUser.user_id
-          })
-          .then(res => {
-            if (res.data.code === "001") {
-              this.$notify({
-                title: '成功',
-                message: '地址添加成功！！！',
-                type: 'success'
-              });
-              this.getAddrByUser()
-            }
-            
-          })
-          .catch(err => {
-            return Promise.reject(err);
+        let label = this.$refs.myCascader.getCheckedNodes()[0].pathLabels
+        this.addr.province = label[0]
+        this.addr.city = label[1]
+        this.addr.area = label[2]
+        console.log(this.addr)
+        addAddress(this.addr).then(res => {
+          if(res.data.code === 200){
+            this.$notify({
+              title: '成功',
+              message: '地址添加成功！！！',
+              type: 'success'
+            });
+            this.getAddrByUser()
+            this.dialogFormVisible = false
+          }
+        }).catch(err => {
+          this.$notify({
+            title: '失败',
+            message: '地址添加失败！！！',
+            type: 'error'
           });
+        });
         
       },
       addOrder() {
-        this.$axios
+        console.log('this.getCheckGoods',this.getCheckGoods)
+        addGoods({
+          userId:this.$store.getters.getUser.userId,
+          cartList:this.getCheckGoods,
+          orderPrice:this.getTotalPrice
+        }).then(res =>{
+          if(res.data.code === 200){
+            for(let check of this.getCheckGoods){
+              this.deleteShoppingCart(check.cartId);
+            }
+            // 提示结算结果
+            this.notifySucceed(res.data.msg);
+            // 跳转我的订单页面
+            this.$router.push({path: "/order"});
+          }
+        })
+        /*this.$axios
           .post("/api/user/order/addOrder", {
             user_id: this.$store.getters.getUser.user_id,
             products: this.getCheckGoods
@@ -283,7 +317,7 @@
           })
           .catch(err => {
             return Promise.reject(err);
-          });
+          });*/
       },
       liClick(index) {
         this.confirmAddress = index

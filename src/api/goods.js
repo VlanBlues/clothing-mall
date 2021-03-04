@@ -14,3 +14,11 @@ export function getByGoodsId(data) {
     params:data
   })
 }
+
+export function addGoods(data) {
+  return request({
+    url: '/mall/order/add',
+    method: 'post',
+    data
+  })
+}
