@@ -1,7 +1,8 @@
 
 export default {
   state: {
-    shoppingCart: []
+    shoppingCart: [],
+    totalNum:0
     // shoppingCart结构
     /* 
     shoppingCart = {
@@ -35,7 +36,7 @@ export default {
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
         // 只要有一个商品没有勾选立即return false;
-        if (!temp.check) {
+        if (!temp.checkSet) {
           isAllCheck = false;
           return isAllCheck;
         }
@@ -48,7 +49,7 @@ export default {
       let checkGoods = [];
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
+        if (temp.checkSet) {
           checkGoods.push(temp);
         }
       }
@@ -60,7 +61,7 @@ export default {
       let totalNum = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
+        if (temp.checkSet) {
           totalNum += temp.goodsNum;
         }
       }
@@ -71,7 +72,7 @@ export default {
       let totalPrice = 0;
       for (let i = 0; i < state.shoppingCart.length; i++) {
         const temp = state.shoppingCart[i];
-        if (temp.check) {
+        if (temp.checkSet) {
           totalPrice += temp.goods.retailPrice * temp.goodsNum;
         }
       }
@@ -80,8 +81,15 @@ export default {
   },
   mutations: {
     setShoppingCart (state, data) {
+      console.log('setShoppingCart',data)
       // 设置购物车状态
-      state.shoppingCart = data;
+      state.shoppingCart = data
+      /*if(state.shoppingCart.length === 0){
+        state.shoppingCart = data
+      }else {
+        state.shoppingCart.splice(0,state.shoppingCart.length,data)
+        console.log('setShoppingCart777777777777',state.shoppingCart)
+      }*/
     },
     unshiftShoppingCart (state, data) {
       // 添加购物车
@@ -125,7 +133,7 @@ export default {
     checkAll (state, data) {
       // 点击全选按钮，更改每个商品的勾选状态
       for (let i = 0; i < state.shoppingCart.length; i++) {
-        state.shoppingCart[i].check = data;
+        state.shoppingCart[i].checkSet = data;
       }
     }
   },

@@ -79,6 +79,15 @@
 
       <!-- 结算列表 -->
       <div class="section-count">
+        <div class="message">
+          <p>留言</p>
+          <el-input
+                  type="textarea"
+                  :rows="6"
+                  placeholder="请输入留言"
+                  v-model="message">
+          </el-input>
+        </div>
         <div class="money-box">
           <ul>
             <li>
@@ -148,7 +157,7 @@
 <script>
   import {mapGetters} from "vuex";
   import {mapActions} from "vuex";
-  import {addGoods} from "@/api/goods"
+  import {addOrder} from "@/api/order"
   import {addAddress , getAddressByUserId} from "@/api/address"
   let pca = require("@/assets/pca-code.json")
   export default {
@@ -158,6 +167,8 @@
         options: pca,
         selectedOptions:[],
         dialogFormVisible: false,
+        message:'',
+        //用于添加地址
         addr: {
           userId:this.$store.getters.getUser.userId,
           name: '',
@@ -168,7 +179,6 @@
           address:''
         },
         formLabelWidth: '70px',
-        // 虚拟数据
         confirmAddress: 0, // 选择的地址id
         // 地址列表
         address: [
@@ -275,9 +285,10 @@
       },
       addOrder() {
         console.log('this.getCheckGoods',this.getCheckGoods)
-        addGoods({
+        addOrder({
           userId:this.$store.getters.getUser.userId,
           cartList:this.getCheckGoods,
+          addressId:this.address[this.confirmAddress].addressId,
           orderPrice:this.getTotalPrice
         }).then(res =>{
           if(res.data.code === 200){
@@ -432,7 +443,6 @@
 
   .confirmOrder .content .address-body li .address {
     padding: 10px 0;
-    max-width: 180px;
     max-height: 88px;
     line-height: 22px;
     overflow: hidden;
@@ -569,10 +579,20 @@
     padding: 20px 0;
     overflow: hidden;
   }
+  .section-count >div{
+    display: inline-block;
+  }
 
   .confirmOrder .content .section-count .money-box {
     float: right;
     text-align: right;
+  }
+  .section-count .message{
+    float: left;
+    width: 60%;
+  }
+  .section-count .message p{
+    margin-bottom: 20px;
   }
 
   .confirmOrder .content .section-count .money-box .title {

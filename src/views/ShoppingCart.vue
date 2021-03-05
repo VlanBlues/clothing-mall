@@ -33,7 +33,7 @@
         <!-- 购物车列表 -->
         <li class="product-list" v-for="(item,index) in getShoppingCart" :key="item.cartId">
           <div class="pro-check">
-            <el-checkbox :value="item.check" @change="checkChange($event,index)"></el-checkbox>
+            <el-checkbox :value="item.checkSet" @change="checkChange($event,index)"></el-checkbox>
           </div>
           <div class="pro-img">
             <router-link :to="{ path: '/goods/details', query: {goodsId:item.goods.goodsId} }">
@@ -62,7 +62,7 @@
                 <el-button
                   type="primary"
                   size="mini"
-                  @click="deleteItem($event,item.id,item.productID)"
+                  @click="deleteItem(item.cartId)"
                 >确定</el-button>
               </div>
               <i class="el-icon-error" slot="reference" style="font-size: 18px;"></i>
@@ -112,7 +112,7 @@
 <script>
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
-import {updateCart} from "@/api/cart"
+import {updateCart,deleteCart} from "@/api/cart"
 export default {
   data() {
     return {};
@@ -122,7 +122,7 @@ export default {
     // 修改商品数量的时候调用该函数
     handleChange(currentValue, key, cartId) {
       // 当修改数量时，默认勾选
-      this.updateShoppingCart({ key: key, prop: "check", val: true });
+      this.updateShoppingCart({ key: key, prop: "checkSet", val: true });
       // 向后端发起更新购物车的数据库信息请求
       updateCart({
           cartId: cartId,
@@ -147,29 +147,21 @@ export default {
     },
     checkChange(val, key) {
       // 更新vuex中购物车商品是否勾选的状态
-      this.updateShoppingCart({ key: key, prop: "check", val: val });
+      this.updateShoppingCart({ key: key, prop: "checkSet", val: val });
       console.log(val,key)
       console.log(this.getShoppingCart)
     },
     // 向后端发起删除购物车的数据库信息请求
-    deleteItem(e, id, productID) {
-      this.$axios
-        .post("/api/user/shoppingCart/deleteShoppingCart", {
-          user_id: this.$store.getters.getUser.user_id,
-          product_id: productID
-        })
-        .then(res => {
-          switch (res.data.code) {
-            case "001":
-              // “001” 删除成功
-              // 更新vuex状态
-              this.deleteShoppingCart(id);
-              // 提示删除成功信息
-              this.notifySucceed(res.data.msg);
-              break;
-            default:
-              // 提示删除失败信息
-              this.notifyError(res.data.msg);
+    deleteItem( cartId) {
+      console.log(cartId)
+      deleteCart({
+        cartId:cartId
+      }).then(res => {
+          if(res.data.code === 200){
+            // 更新vuex状态
+            this.deleteShoppingCart(cartId);
+            // 提示删除成功信息
+            this.notifySucceed(res.data.msg);
           }
         })
         .catch(err => {

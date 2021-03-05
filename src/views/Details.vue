@@ -103,7 +103,8 @@ export default {
         })
         .then(res => {
           this.notifySucceed(res.data.msg);
-          this.setShoppingCart(res.data.data);
+          console.log('addCart',res.data.data)
+          this.setShoppingCart(res.data.data.data);
         })
         .catch(err => {
           return Promise.reject(err);

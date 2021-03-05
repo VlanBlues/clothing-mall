@@ -56,8 +56,8 @@
           <el-menu-item index="/goods">全部商品</el-menu-item>
 
           <div class="so">
-            <el-input placeholder="请输入搜索内容" v-model="search">
-              <el-button slot="append" icon="el-icon-search" @click="searchClick"></el-button>
+            <el-input clearable placeholder="请输入搜索内容" v-model="search">
+              <el-button  slot="append" icon="el-icon-search" @click="searchClick"></el-button>
             </el-input>
           </div>
         </el-menu>
@@ -190,7 +190,7 @@ export default {
       if (this.search != "") {
         // 跳转到全部商品页面,并传递搜索条件
         this.$router.push({ path: "/goods", query: { search: this.search } });
-        this.search = "";
+        // this.search = "";
       }
     }
   }

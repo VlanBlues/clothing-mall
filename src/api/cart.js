@@ -22,3 +22,11 @@ export function updateCart(data) {
     data
   })
 }
+
+export function deleteCart(data) {
+  return request({
+    url: '/mall/cart/delete',
+    method: 'get',
+    params:data
+  })
+}

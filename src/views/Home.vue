@@ -28,7 +28,7 @@
         <!-- 外套展示区域 -->
         <div class="box">
           <div class="box-hd">
-            <div class="title">家电</div>
+            <div class="title">外套</div>
             <div class="more" id="more">
               <MyMenu :val="4" @fromChild="getChildMsg">
                 <span slot="1">风衣</span>
@@ -138,6 +138,7 @@ export default {
       //获取数据
       listByCategory({current:1,size:10}).then(res =>{
         if(res.data.code === 200){
+          console.log('获取全部数据',res)
           let dataList = res.data.data;
           this.shirtList = dataList[0].list;
           this.jeansList = dataList[1].list;
@@ -159,22 +160,6 @@ export default {
     },
     getChildMsg2(val) {
       this.trousersActive = val;
-    },
-    // 获取各类商品数据方法封装
-    getPromo(categoryName, val, api) {
-      api = api != undefined ? api : "/api/product/getPromoProduct";
-      console.log(categoryName,api)
-      this.$axios
-        .post(api, {
-          categoryName
-        })
-        .then(res => {
-          // console.log(categoryName,JSON.stringify(res.data.Product))
-          this[val] = res.data.Product;
-        })
-        .catch(err => {
-          return Promise.reject(err);
-        });
     },
     test(index){
       console.log('99999',index)

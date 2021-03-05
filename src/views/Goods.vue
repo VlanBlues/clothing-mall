@@ -22,9 +22,9 @@
         <el-tabs v-model="activeName" type="card">
           <el-tab-pane
             v-for="item in categoryList"
-            :key="item.category_id"
-            :label="item.category_name"
-            :name="''+item.category_id"
+            :key="item.categoryId"
+            :label="item.name"
+            :name="''+item.categoryId"
           />
         </el-tabs>
       </div>
@@ -53,17 +53,19 @@
   </div>
 </template>
 <script>
+  import {listCategory} from "@/api/category"
+  import {listByCategoryId,listBySearch} from "@/api/goods"
 export default {
   data() {
     return {
       categoryList: "", //分类列表
-      categoryID: [], // 分类id
+      categoryId: undefined, // 分类id
       product: "", // 商品列表
       productList: "",
       total: 0, // 商品总量
       pageSize: 15, // 每页显示的商品数量
       currentPage: 1, //当前页码
-      activeName: "-1", // 分类列表当前选中的id
+      activeName: "100101305", // 分类列表当前选中的id
       search: "" // 搜索条件
     };
   },
@@ -72,21 +74,21 @@ export default {
     this.getCategory();
   },
   activated() {
-    this.activeName = "-1"; // 初始化分类列表当前选中的id为-1
+    this.activeName = "100101305"; // 初始化分类列表当前选中的id
     this.total = 0; // 初始化商品总量为0
     this.currentPage = 1; //初始化当前页码为1
     // 如果路由没有传递参数，默认为显示全部商品
     if (Object.keys(this.$route.query).length == 0) {
-      this.categoryID = [];
-      this.activeName = "0";
+      console.log('没有参数')
+      this.categoryId = 100101305;
+      this.activeName = "100101305";
       return;
     }
-    // 如果路由传递了categoryID，则显示对应的分类商品
-    if (this.$route.query.categoryID !== undefined) {
-      this.categoryID = this.$route.query.categoryID;
-      if (this.categoryID.length === 1) {
-        this.activeName = "" + this.categoryID[0];
-      }
+    // 如果路由传递了categoryId，则显示对应的分类商品
+    if (this.$route.query.categoryId !== undefined) {
+      console.log('传参',this.$route.query.categoryId)
+      this.categoryId = this.$route.query.categoryId;
+      this.activeName = ''+this.$route.query.categoryId
       return;
     }
     // 如果路由传递了search，则为搜索，显示对应的分类商品
@@ -97,19 +99,12 @@ export default {
   watch: {
     // 监听点击了哪个分类标签，通过修改分类id，响应相应的商品
     activeName: function(val) {
-      if (val == 0) {
-        this.categoryID = [];
-      }
-      if (val > 0) {
-        this.categoryID = [Number(val)];
-      }
-      // 初始化商品总量和当前页码
-      this.total = 0;
-      this.currentPage = 1;
-      // 更新地址栏链接，方便刷新页面可以回到原来的页面
+      console.log('val',val)
+      this.categoryId = val;
+      this.activeName = ''+val;
       this.$router.push({
         path: "/goods",
-        query: { categoryID: this.categoryID }
+        query: { categoryId: this.categoryId }
       });
     },
     // 监听搜索条件，响应相应的商品
@@ -119,18 +114,21 @@ export default {
       }
     },
     // 监听分类id，响应相应的商品
-    categoryID: function() {
-      this.getData();
-      this.search = "";
+    categoryId: function() {
+      if(this.categoryId === '0'){
+        this.getProductBySearch()
+      }else {
+        this.getData();
+        this.search = "";
+      }
+      
     },
     // 监听路由变化，更新路由传递了搜索条件
     $route: function(val) {
       if (val.path == "/goods") {
         if (val.query.search != undefined) {
-          this.activeName = "-1";
-          this.currentPage = 1;
-          this.total = 0;
           this.search = val.query.search;
+          this.activeName = '0'
         }
       }
     }
@@ -161,16 +159,14 @@ export default {
     },
     // 向后端请求分类列表数据
     getCategory() {
-      this.$axios
-        .post("/api/product/getCategory", {})
+      listCategory()
         .then(res => {
-          const val = {
-            category_id: 0,
-            category_name: "全部"
+          this.categoryList = res.data.data;
+          let all = {
+            categoryId:0,
+            name:'全部'
           };
-          const cate = res.data.category;
-          cate.unshift(val);
-          this.categoryList = cate;
+          this.categoryList.push(all);
         })
         .catch(err => {
           return Promise.reject(err);
@@ -178,36 +174,24 @@ export default {
     },
     // 向后端请求全部商品或分类商品数据
     getData() {
-      // 如果分类列表为空则请求全部商品数据，否则请求分类商品数据
-      const api =
-        this.categoryID.length == 0
-          ? "/api/product/getAllProduct"
-          : "/api/product/getProductByCategory";
-      this.$axios
-        .post(api, {
-          categoryID: this.categoryID,
-          currentPage: this.currentPage,
-          pageSize: this.pageSize
-        })
-        .then(res => {
-          this.product = res.data.Product;
+      console.log('请求数据',this.categoryId)
+      listByCategoryId( {
+          categoryId:this.categoryId
+        }).then(res => {
+          console.log('res',res)
+          this.product = res.data.data;
           this.total = res.data.total;
-        })
-        .catch(err => {
+        }).catch(err => {
           return Promise.reject(err);
         });
     },
     // 通过搜索条件向后端请求商品数据
     getProductBySearch() {
-      this.$axios
-        .post("/api/product/getProductBySearch", {
-          search: this.search,
-          currentPage: this.currentPage,
-          pageSize: this.pageSize
+      listBySearch( {
+          search: this.search
         })
         .then(res => {
-          this.product = res.data.Product;
-          this.total = res.data.total;
+          this.product = res.data.data;
         })
         .catch(err => {
           return Promise.reject(err);
