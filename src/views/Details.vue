@@ -25,7 +25,7 @@
         <!-- 内容区底部按钮 -->
         <div class="button">
           <el-button class="shop-cart" :disabled="dis" @click="addShoppingCart">加入购物车</el-button>
-          <el-button class="like" @click="addCollect">喜欢</el-button>
+          <el-button class="like" @click="addCollect(productDetails.goodsSn)">喜欢</el-button>
         </div>
         <!-- 内容区底部按钮END -->
         <div class="pro-policy">
@@ -54,6 +54,7 @@
 import { mapActions } from "vuex";
 import { getByGoodsId } from '@/api/goods'
 import { addCart } from '@/api/cart'
+import { addOrUpdateCollection } from '@/api/collection'
 export default {
   data() {
     return {
@@ -110,24 +111,22 @@ export default {
           return Promise.reject(err);
         });
     },
-    addCollect() {
+    getCollect(){
+      
+    },
+    addCollect(sn) {
       // 判断是否登录,没有登录则显示登录组件
       if (!this.$store.getters.getUser) {
         this.$store.dispatch("setShowLogin", true);
         return;
       }
-      this.$axios
-        .post("/api/user/collect/addCollect", {
-          user_id: this.$store.getters.getUser.user_id,
-          product_id: this.productID
-        })
-        .then(res => {
-          if (res.data.code == "001") {
+      addOrUpdateCollection({
+          userId: this.$store.getters.getUser.userId,
+          goodsSn: sn
+        }).then(res => {
+          if (res.data.code === 200) {
             // 添加收藏成功
             this.notifySucceed(res.data.msg);
-          } else {
-            // 添加收藏失败
-            this.notifyError(res.data.msg);
           }
         })
         .catch(err => {
