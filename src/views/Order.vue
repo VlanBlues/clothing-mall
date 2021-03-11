@@ -45,7 +45,7 @@
             <div class="pro-num">{{product.buyNum}}</div>
             <div class="pro-total pro-total-in">{{product.retailPrice*product.buyNum}}元</div>
             <div>
-              <el-button size="mini" @click="rate(product.name,item.orderId,product.goodsSn)">评价</el-button>
+              <el-button size="mini" @click="rate(product.name,item.orderSn,product.goodsSn)">评价</el-button>
             </div>
           </li>
         </ul>
@@ -121,15 +121,15 @@
         comment:{
           userId: this.$store.getters.getUser.userId,
           content:'',
-          orderId:'',
+          orderSn:'',
           goodsSn:'',
           star:0
         }
       };
     },
     methods:{
-      rate(title,orderId,goodsSn){
-        this.comment.orderId = orderId;
+      rate(title,orderSn,goodsSn){
+        this.comment.orderSn = orderSn;
         this.comment.goodsSn = goodsSn;
         this.dialogTitle = title;
         this.dialogVisible = true

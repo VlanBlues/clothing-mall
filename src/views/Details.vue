@@ -25,7 +25,8 @@
         <!-- 内容区底部按钮 -->
         <div class="button">
           <el-button class="shop-cart" :disabled="dis" @click="addShoppingCart">加入购物车</el-button>
-          <el-button class="like" @click="addCollect(productDetails.goodsSn)">喜欢</el-button>
+          <el-button v-if="!collState" class="like" @click="addCollect(productDetails.goodsId)">喜欢</el-button>
+          <el-button v-else class="like" @click="addCollect(productDetails.goodsId)">已收藏</el-button>
         </div>
         <!-- 内容区底部按钮END -->
         <div class="pro-policy">
@@ -54,7 +55,7 @@
 import { mapActions } from "vuex";
 import { getByGoodsId } from '@/api/goods'
 import { addCart } from '@/api/cart'
-import { addOrUpdateCollection } from '@/api/collection'
+import { addOrUpdateCollection ,getCollectionState} from '@/api/collection'
 export default {
   data() {
     return {
@@ -62,7 +63,8 @@ export default {
       goodsId: "", // 商品id
       productDetails: "", // 商品详细信息
       productPicture: "",// 商品图片
-      goodsNum:1 //商品数量
+      goodsNum:1, //商品数量,
+      collState:false//收藏状态
     };
   },
   // 通过路由获取商品id
@@ -70,6 +72,7 @@ export default {
     window.scrollTo(0,0)
     if (this.$route.query.goodsId !== undefined) {
       this.goodsId = this.$route.query.goodsId;
+      this.getCollection();
     }
   },
   watch: {
@@ -80,6 +83,18 @@ export default {
   },
   methods: {
     ...mapActions(["unshiftShoppingCart", "addShoppingCartNum","setShoppingCart"]),
+    getCollection(){
+      console.log('goodsId',this.$route.query.goodsId)
+      console.log('userId',this.$store.getters.getUser.userId)
+      getCollectionState({
+        goodsId:this.$route.query.goodsId,
+        userId: this.$store.getters.getUser.userId,
+      }).then(res =>{
+        if(res.data.code === 200){
+          this.collState = res.data.data.state
+        }
+      })
+    },
     // 获取商品详细信息
     getDetails(val) {
       getByGoodsId({goodsId:val}).then(res =>{
@@ -114,7 +129,7 @@ export default {
     getCollect(){
       
     },
-    addCollect(sn) {
+    addCollect(id) {
       // 判断是否登录,没有登录则显示登录组件
       if (!this.$store.getters.getUser) {
         this.$store.dispatch("setShowLogin", true);
@@ -122,11 +137,12 @@ export default {
       }
       addOrUpdateCollection({
           userId: this.$store.getters.getUser.userId,
-          goodsSn: sn
+          goodsId: id
         }).then(res => {
           if (res.data.code === 200) {
             // 添加收藏成功
             this.notifySucceed(res.data.msg);
+            this.collState = !this.collState
           }
         })
         .catch(err => {

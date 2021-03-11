@@ -97,22 +97,18 @@ export default {
     // 当前选中的商品分类，响应不同的商品数据
     coatActive: function(val) {
       if (val === 1) {
-        // 1为热门商品
         this.coatList = this.windbreakerList;
         return;
       }
       if (val === 2) {
-        // 2为电视商品
         this.coatList = this.cottonList;
         return;
       }
       if (val === 3) {
-        // 2为电视商品
         this.coatList = this.downJacketsList;
         return;
       }
       if (val === 4) {
-        // 2为电视商品
         this.coatList = this.leatherList;
         return;
       }

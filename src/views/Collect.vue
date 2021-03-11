@@ -24,26 +24,27 @@
   </div>
 </template>
 <script>
+  import {listByUserId} from "@/api/collection"
 export default {
   data() {
     return {
-      collectList: []
+      collectList: [],
+      
     };
   },
   activated() {
     // 获取收藏数据
-    /*this.$axios
-      .post("/api/user/collect/getCollect", {
-        user_id: this.$store.getters.getUser.user_id
-      })
-      .then(res => {
-        if (res.data.code === "001") {
-          this.collectList = res.data.collectList;
-        }
-      })
-      .catch(err => {
-        return Promise.reject(err);
-      });*/
+    listByUserId({
+      userId:this.$store.getters.getUser.userId
+    }).then(res =>{
+      console.log(res)
+      let collectionData = res.data.data;
+      let goodsList = [];
+      for(let item of collectionData){
+        goodsList.push(item.mallGoods)
+      }
+      this.collectList = goodsList
+    })
   }
 };
 </script>
