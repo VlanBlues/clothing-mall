@@ -8,3 +8,11 @@ export function addComment(data) {
     params:data
   })
 }
+
+export function listComment(data) {
+  return request({
+    url: '/mall/comment/list',
+    method: 'get',
+    params:data
+  })
+}

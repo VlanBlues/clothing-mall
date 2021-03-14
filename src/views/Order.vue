@@ -45,7 +45,8 @@
             <div class="pro-num">{{product.buyNum}}</div>
             <div class="pro-total pro-total-in">{{product.retailPrice*product.buyNum}}元</div>
             <div>
-              <el-button size="mini" @click="rate(product.name,item.orderSn,product.goodsSn)">评价</el-button>
+              <el-button v-if="product.isComment === 0" size="mini" @click="rate(product.name,item.orderSn,product.goodsSn)">评价</el-button>
+              <el-button v-else size="mini" disabled>已评价</el-button>
             </div>
           </li>
         </ul>
@@ -138,34 +139,38 @@
         console.log('this.comment',this.comment)
         addComment(this.comment).then(res =>{
           if (res.data.code === 200){
-            this.dialogVisible = false
+            this.dialogVisible = false;
+            this.getOrder()
             this.$notify({
               title: '成功',
               message: res.data.msg,
               type: 'success'
             });
-          } 
+          }
         })
-      }
-    },
-    activated() {
-      // 获取订单数据
-      listByUser({
-        userId: this.$store.getters.getUser.userId,
-        current: 1,
-        size: 10
-      }).then(res => {
-        if (res.data.code === 200) {
-          console.log('order page', res.data.data)
-          this.orderList = res.data.data;
-          this.test = res.data.data
-        } else {
-          this.notifyError(res.data.msg);
-        }
-      })
+      },
+      getOrder(){
+        // 获取订单数据
+        listByUser({
+          userId: this.$store.getters.getUser.userId,
+          current: 1,
+          size: 10
+        }).then(res => {
+          if (res.data.code === 200) {
+            console.log('order page', res.data.data)
+            this.orderList = res.data.data.records;
+            this.test = res.data.data.records
+          } else {
+            this.notifyError(res.data.msg);
+          }
+        })
         .catch(err => {
           return Promise.reject(err);
         });
+      }
+    },
+    activated() {
+      this.getOrder()
     },
     watch: {
       // 通过订单信息，计算出每个订单的商品数量及总价

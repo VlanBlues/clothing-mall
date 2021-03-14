@@ -30,3 +30,18 @@ export function logout() {
     method: 'post'
   })
 }
+export function uploadFile(data) {
+  return request({
+    url: '/mall/img/upload2',
+    method: 'post',
+    data
+  })
+}
+
+export function addOrUpdate(data) {
+  return request({
+    url: '/mall/user/update',
+    method: 'post',
+    data
+  })
+}

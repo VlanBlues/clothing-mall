@@ -29,16 +29,18 @@ export default {
   data() {
     return {
       collectList: [],
-      
+
     };
   },
   activated() {
     // 获取收藏数据
     listByUserId({
-      userId:this.$store.getters.getUser.userId
+      userId:this.$store.getters.getUser.userId,
+      current:1,
+      size:40
     }).then(res =>{
       console.log(res)
-      let collectionData = res.data.data;
+      let collectionData = res.data.data.records;
       let goodsList = [];
       for(let item of collectionData){
         goodsList.push(item.mallGoods)

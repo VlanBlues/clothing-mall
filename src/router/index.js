@@ -63,6 +63,14 @@ const routes = [
     meta: {
       requireAuth: true // 需要验证登录状态
     }
+  },
+  {
+    path: '/personalInfo',
+    name: 'PersonalInfo',
+    component: () => import('../views/PersonalInfo.vue'),
+    meta: {
+      requireAuth: true // 需要验证登录状态
+    }
   }
 ]
 

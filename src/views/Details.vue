@@ -1,52 +1,80 @@
-<template>
+ <template>
   <div id="details">
     <!-- 主要内容 -->
     <div class="main">
-      <!-- 左侧商品轮播图 -->
-      <div class="block">
-        <el-carousel height="500px" v-if="productPicture.length>1">
-          <el-carousel-item v-for="item in productPicture" :key="item">
-            <img style="width:500px;" :src="item" :alt="item" />
-          </el-carousel-item>
-        </el-carousel>
-      </div>
-      <!-- 左侧商品轮播图END -->
+      <div style="overflow: hidden">
+        <!-- 左侧商品轮播图 -->
+        <div class="block">
+          <el-carousel height="500px" v-if="productPicture.length>1">
+            <el-carousel-item v-for="item in productPicture" :key="item">
+              <img style="width:500px;" :src="item" :alt="item" />
+            </el-carousel-item>
+          </el-carousel>
+        </div>
+        <!-- 左侧商品轮播图END -->
 
-      <!-- 右侧内容区 -->
-      <div class="content">
-        <h1 class="name">{{productDetails.name}}</h1>
-        <p class="brief">{{productDetails.brief}}</p>
-        <p class="store">商城自营</p>
-        <div class="pro-list">
-          <span class="pro-name">{{productDetails.name}}</span>
-          <el-input-number size="small" v-model="goodsNum"></el-input-number>
-          <p class="price-sum">总计 : {{productDetails.retailPrice * goodsNum}}元</p>
+        <!-- 右侧内容区 -->
+        <div class="content">
+          <h1 class="name">{{productDetails.name}}</h1>
+          <p class="brief">{{productDetails.brief}}</p>
+          <p class="store">商城自营</p>
+          <div class="pro-list">
+            <span class="pro-name">{{productDetails.name}}</span>
+            <el-input-number size="small" v-model="goodsNum"></el-input-number>
+            <p class="price-sum">总计 : {{productDetails.retailPrice * goodsNum}}元</p>
+          </div>
+          <!-- 内容区底部按钮 -->
+          <div class="button">
+            <el-button class="shop-cart" :disabled="dis" @click="addShoppingCart">加入购物车</el-button>
+            <el-button v-if="!collState" class="like" @click="addCollect(productDetails.goodsId)">喜欢</el-button>
+            <el-button v-else class="like" @click="addCollect(productDetails.goodsId)">已收藏</el-button>
+          </div>
+          <el-divider></el-divider>
+          <!-- 内容区底部按钮END -->
+          <div class="pro-policy">
+            <ul>
+              <li>
+                <i class="el-icon-circle-check"></i> 商城自营
+              </li>
+              <li>
+                <i class="el-icon-circle-check"></i> 商城发货
+              </li>
+              <li>
+                <i class="el-icon-circle-check"></i> 7天无理由退货
+              </li>
+              <li>
+                <i class="el-icon-circle-check"></i> 7天价格保护
+              </li>
+            </ul>
+          </div>
         </div>
-        <!-- 内容区底部按钮 -->
-        <div class="button">
-          <el-button class="shop-cart" :disabled="dis" @click="addShoppingCart">加入购物车</el-button>
-          <el-button v-if="!collState" class="like" @click="addCollect(productDetails.goodsId)">喜欢</el-button>
-          <el-button v-else class="like" @click="addCollect(productDetails.goodsId)">已收藏</el-button>
-        </div>
-        <!-- 内容区底部按钮END -->
-        <div class="pro-policy">
-          <ul>
-            <li>
-              <i class="el-icon-circle-check"></i> 商城自营
-            </li>
-            <li>
-              <i class="el-icon-circle-check"></i> 商城发货
-            </li>
-            <li>
-              <i class="el-icon-circle-check"></i> 7天无理由退货
-            </li>
-            <li>
-              <i class="el-icon-circle-check"></i> 7天价格保护
-            </li>
-          </ul>
-        </div>
+        <!-- 右侧内容区END -->
       </div>
-      <!-- 右侧内容区END -->
+      <el-divider></el-divider>
+    </div>
+    <div class="bottom-content">
+      <p>评论</p>
+      <div class="comment">
+        <div v-if="commentList.length !== 0">
+          <div  v-for="item in commentList" :key="item.commentId" class="comment-box">
+            <div>
+              <el-avatar size="medium" :src="item.user.avatar"></el-avatar>
+              <div class="comment-user">
+                <div>
+                  <span>{{item.user.username}}</span>
+                  <el-rate style="display: inline-block;margin-left: 10px;vertical-align: top"
+                           disabled
+                           v-model="item.star">
+                  </el-rate>
+                </div>
+                <p>{{item.addTime}}</p>
+              </div>
+            </div>
+            <p class="comment-content">sdfsdfsdfsdfsdfsdfsdfsdf</p>
+          </div>
+        </div>
+        <div v-else style="text-align: center;line-height: 60px">暂无评论</div>
+      </div>
     </div>
     <!-- 主要内容END -->
   </div>
@@ -55,6 +83,7 @@
 import { mapActions } from "vuex";
 import { getByGoodsId } from '@/api/goods'
 import { addCart } from '@/api/cart'
+import { listComment } from '@/api/comment'
 import { addOrUpdateCollection ,getCollectionState} from '@/api/collection'
 export default {
   data() {
@@ -64,7 +93,8 @@ export default {
       productDetails: "", // 商品详细信息
       productPicture: "",// 商品图片
       goodsNum:1, //商品数量,
-      collState:false//收藏状态
+      collState:false,//收藏状态
+      commentList:[]
     };
   },
   // 通过路由获取商品id
@@ -74,6 +104,7 @@ export default {
       this.goodsId = this.$route.query.goodsId;
       this.getCollection();
     }
+    this.getComments()
   },
   watch: {
     // 监听商品id的变化，请求后端获取商品数据
@@ -84,8 +115,6 @@ export default {
   methods: {
     ...mapActions(["unshiftShoppingCart", "addShoppingCartNum","setShoppingCart"]),
     getCollection(){
-      console.log('goodsId',this.$route.query.goodsId)
-      console.log('userId',this.$store.getters.getUser.userId)
       getCollectionState({
         goodsId:this.$route.query.goodsId,
         userId: this.$store.getters.getUser.userId,
@@ -94,6 +123,19 @@ export default {
           this.collState = res.data.data.state
         }
       })
+    },
+    getComments(){
+      listComment({
+        current:1,
+        size:20,
+        goodsSn:this.$route.query.goodsSn
+      }).then(res =>{
+        if(res.data.code === 200){
+          console.log('commentList',res.data.data);
+          this.commentList = res.data.data.records
+        }
+      })
+
     },
     // 获取商品详细信息
     getDetails(val) {
@@ -127,7 +169,7 @@ export default {
         });
     },
     getCollect(){
-      
+
     },
     addCollect(id) {
       // 判断是否登录,没有登录则显示登录组件
@@ -261,3 +303,35 @@ export default {
 }
 /* 主要内容CSS END */
 </style>
+ <style>
+   .bottom-content{
+     width: 1225px;
+     margin: 0 auto;
+   }
+   .comment{
+     margin-top: 20px;
+     min-height: 100px;
+     overflow: hidden;
+   }
+   .comment .comment-box{
+     padding-bottom: 10px;
+     border-bottom: 1px solid #DCDFE6;
+     margin-bottom: 20px;
+   }
+   .comment .comment-user{
+     display: inline-block;
+     vertical-align: top;
+     margin-left: 10px;
+     font-size: 15px;
+   }
+   .comment .comment-user p:last-child{
+     font-size: 12px;
+     color: #6a737d;
+   }
+   .comment-content{
+     font-size: 16px;
+     margin-top: 10px;
+     width: 80%;
+   }
+
+ </style>

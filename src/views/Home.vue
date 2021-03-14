@@ -17,7 +17,7 @@
             <div class="title">衬衫</div>
           </div>
           <div class="box-bd">
-            
+
             <div class="list">
               <MyList :list="shirtList" :isMore="true"></MyList>
             </div>
@@ -29,7 +29,7 @@
         <div class="box">
           <div class="box-hd">
             <div class="title">外套</div>
-            <div class="more" id="more">
+            <div class="more" >
               <MyMenu :val="4" @fromChild="getChildMsg">
                 <span slot="1">风衣</span>
                 <span slot="2">棉衣</span>
@@ -78,7 +78,7 @@ export default {
         require('@/assets/imgs/carousel/2.jpg'),
         require('@/assets/imgs/carousel/3.jpg'),
         require('@/assets/imgs/carousel/4.jpg'),
-        
+
       ], // 轮播图数据
       shirtList:[],//衬衫列表
       jeansList:[],//牛仔裤列表
@@ -145,12 +145,12 @@ export default {
           this.downJacketsList = dataList[4].list;
           this.leatherList = dataList[5].list;
           this.sweatpantsList = dataList[6].list;
-          
+
         }
         console.log('this.shirtList',this.shirtList)
       })
     },
-    
+
     getChildMsg(val) {
       this.coatActive = val;
     },
@@ -173,7 +173,7 @@ export default {
     margin: 0 auto;
     max-width: 1225px;
   }
-  
+
   /* 轮播图CSS */
   .block {
     margin: 0 auto;

@@ -3,8 +3,8 @@
   <div id="myList" class="myList">
     <ul>
       <li v-for="item in list" :key="item.product_id">
-        
-        <router-link :to="{ path: '/goods/details', query: {goodsId:item.goodsId} }">
+
+        <router-link :to="{ path: '/goods/details', query: {goodsId:item.goodsId,goodsSn:item.goodsSn} }">
           <img :src="item.picUrl" alt />
           <h2>{{item.name}}</h2>
           <h3>{{item.name}}</h3>
